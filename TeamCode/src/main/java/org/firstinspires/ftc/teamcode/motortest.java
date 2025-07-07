@@ -8,28 +8,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class motortest extends OpMode {
 
-    DcMotor motor;
-    Servo servo;
-
-    double pos = 0.d;
-    private boolean sign = false;
+    DcMotor motorss, motorfs;
     @Override
     public void init() {
-        motor = hardwareMap.get(DcMotor.class, "motor");
-        servo = hardwareMap.get(Servo.class, "servo");
+        motorss = hardwareMap.get(DcMotor.class, "msd");
+        motorfs = hardwareMap.get(DcMotor.class, "mfd");
     }
-
     @Override
     public void loop() {
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motor.setPower(1);
+        motorss.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorss.setPower(gamepad1.left_stick_x);
+        motorfs.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorfs.setPower(gamepad1.left_stick_y);
 
-        if ( gamepad1.left_trigger > 0.2)
-            pos -= 0.002 * gamepad1.left_trigger;
-
-        if ( gamepad1.right_trigger > 0.2)
-            pos += 0.002 * gamepad1.right_trigger;
-
-        servo.setPosition(pos);
     }
 }

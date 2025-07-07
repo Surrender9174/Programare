@@ -12,29 +12,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 public class motorsasiutest extends OpMode {
-    DcMotor motorfsstanga, motorfsdreapta, motorspdreapta, motorspstanga;
+    DcMotor motorfst, motorfdr, motorsdr, motorsst, motorscr;
     IMU imu;
     @Override
      public void init(){
-        motorfsstanga = hardwareMap.get(DcMotor.class, "motorfsstanga");
-        motorfsdreapta = hardwareMap.get(DcMotor.class, "motorfsdreapta");
-        motorspdreapta = hardwareMap.get(DcMotor.class, "motorspdreapta");
-        motorspstanga = hardwareMap.get(DcMotor.class, "motorspstanga");
+        motorfst = hardwareMap.get(DcMotor.class, "mfs");
+        motorfdr = hardwareMap.get(DcMotor.class, "mfd");
+        motorsst = hardwareMap.get(DcMotor.class, "mss");
+        motorsdr = hardwareMap.get(DcMotor.class, "msd");
+        motorscr = hardwareMap.get(DcMotor.class, "motorscripete");
 
-        motorfsdreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorfsstanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorspdreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorspstanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        motorfdr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorfst.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorsdr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorsst.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorscr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorscr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorfdr.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorsdr.setDirection(DcMotorSimple.Direction.REVERSE);
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
         imu.resetYaw();
-        motorfsdreapta.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorspdreapta.setDirection(DcMotorSimple.Direction.REVERSE);
-
     }
 
     @Override
@@ -44,25 +45,34 @@ public class motorsasiutest extends OpMode {
         double rx = -gamepad1.right_stick_x;
 
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        telemetry.addData("unghi", botHeading);
-
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
+        rotX = rotX * 1.1;
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = (rotY + rotX + rx) / denominator;
         double backLeftPower = (rotY - rotX + rx) / denominator;
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
-
-        motorfsdreapta.setPower(frontRightPower);
-        motorfsstanga.setPower(frontLeftPower);
-        motorspstanga.setPower(backLeftPower);
-        motorspdreapta.setPower(backRightPower);
-
+        double scripete = gamepad1.left_trigger - gamepad1.right_trigger;
+        motorfdr.setPower(frontRightPower);
+        motorfst.setPower(frontLeftPower);
+        motorsst.setPower(backLeftPower);
+        motorsdr.setPower(backRightPower);
+        motorscr.setPower(scripete);
+        if(gamepad1.options)
+            imu.resetYaw();
+        telemetry.addData("Pozitie", motorscr.getCurrentPosition());
         telemetry.update();
-
+        if(gamepad1.left_bumper){
+            double starttime = getRuntime();
+            double endtime = starttime;
+            while(endtime - starttime > 2000000
+            ){
+                endtime = getRuntime();
+                motorscr.setPower(1);
+            }
+            motorscr.setPower(0.5);
+        }
     }
 }
-
 
